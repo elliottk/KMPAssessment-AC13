@@ -1,18 +1,17 @@
-package org.example.project.features.headlines
+package org.example.project.features.headlines.data
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
-import org.example.project.features.headlines.data.HeadlinesRepository
 import org.example.project.features.headlines.data.model.HeadlineDto
 import org.example.project.features.headlines.data.model.MediaDto
 
 class FakeHeadlinesRepository : HeadlinesRepository {
     override suspend fun getAllHeadlines(): Result<List<HeadlineDto>> {
         val nowEpoch =
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date.atStartOfDayIn(
-                TimeZone.currentSystemDefault()
+            Clock.System.now().toLocalDateTime(TimeZone.Companion.currentSystemDefault()).date.atStartOfDayIn(
+                TimeZone.Companion.currentSystemDefault()
             ).toEpochMilliseconds()
         return Result.success(
             List(50) { index ->

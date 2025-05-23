@@ -5,8 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.project.features.headlines.FakeHeadlinesRepository
-import org.example.project.features.headlines.domain.GetAllHeadlines
+import org.koin.mp.KoinPlatform.getKoin
 
 class HeadlinesAndroidViewModel(
     factory: () -> HeadlinesViewModel,
@@ -28,9 +27,7 @@ actual fun rememberHeadlinesViewModel(): HeadlinesViewModel {
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return HeadlinesAndroidViewModel {
-                    HeadlinesViewModel(
-                        getAllHeadlines = GetAllHeadlines(headlinesRepository = FakeHeadlinesRepository())
-                    )
+                    getKoin().get<HeadlinesViewModel>()
                 } as T
             }
         }

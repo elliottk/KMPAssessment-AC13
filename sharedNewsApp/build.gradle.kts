@@ -39,6 +39,7 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.collections.immutable)
+            implementation(libs.koin.core)
         }
 
         androidMain.dependencies {
@@ -47,6 +48,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.androidx.lifecycle.viewmodel.compose)
             implementation(libs.androidx.lifecycle.runtime.compose)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.android)
             // Add Android dependencies here
         }
 
