@@ -1,5 +1,6 @@
 package org.example.project.features.headlines.presentation
 
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
@@ -65,3 +66,6 @@ class HeadlinesViewModel(
         ) : State
     }
 }
+
+@Composable
+expect fun rememberHeadlinesViewModel(): HeadlinesViewModel

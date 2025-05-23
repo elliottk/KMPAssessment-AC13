@@ -36,8 +36,6 @@ kotlin {
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
-            implementation(libs.androidx.lifecycle.viewmodel)
-            implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.collections.immutable)
@@ -46,12 +44,22 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(libs.androidx.lifecycle.viewmodel.compose)
+            implementation(libs.androidx.lifecycle.runtime.compose)
             // Add Android dependencies here
         }
 
         iosMain.dependencies {
             // Add iOS dependencies here
         }
+    }
+}
+
+// Enables new guard syntax
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xwhen-guards")
     }
 }
 
