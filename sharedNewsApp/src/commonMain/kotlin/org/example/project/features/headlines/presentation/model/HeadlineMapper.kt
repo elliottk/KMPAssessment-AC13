@@ -1,5 +1,6 @@
 package org.example.project.features.headlines.presentation.model
 
+import kotlinx.datetime.LocalDate
 import org.example.project.features.headlines.domain.model.Headline as DomainHeadline
 
 fun DomainHeadline.toPresentation(): Headline {
@@ -9,7 +10,9 @@ fun DomainHeadline.toPresentation(): Headline {
         description = description,
         author = author,
         imageUrl = imageUrl,
-        // TODO
-        publishedDate = ""
+        publishedDate = publishedDate.format()
     )
 }
+
+// TODO
+private fun LocalDate.format() = "${month.name} $dayOfMonth, $year"
