@@ -1,5 +1,6 @@
 package org.example.project.features.headlines.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,13 +9,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,14 +26,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import kotlinx.collections.immutable.toPersistentList
+import newsapp.sharednewsapp.generated.resources.Res
+import newsapp.sharednewsapp.generated.resources.Res.drawable
+import newsapp.sharednewsapp.generated.resources.errorLoadingHeadlines
+import newsapp.sharednewsapp.generated.resources.error_24dp_1f1f1f_fill0_wght400_grad0_opsz24
+import newsapp.sharednewsapp.generated.resources.headlinesEmpty
+import newsapp.sharednewsapp.generated.resources.news_24dp_1f1f1f_fill0_wght400_grad0_opsz24
+import newsapp.sharednewsapp.generated.resources.retry
 import org.example.project.features.headlines.debug.fakeHeadlineList
+import org.example.project.features.headlines.presentation.HeadlinesIntent
 import org.example.project.features.headlines.presentation.HeadlinesViewModel
 import org.example.project.features.headlines.presentation.model.toPresentation
 import org.example.project.features.headlines.presentation.rememberHeadlinesViewModel
+import org.jetbrains.compose.resources.painterResource
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.example.project.features.headlines.presentation.model.Headline as HeadlinePresentationModel
 
@@ -40,6 +56,8 @@ fun HeadlinesRoot(
 ) {
     val state by viewModel.uiState.collectAsState()
     Headlines(
+        onReloadHeadlines = { viewModel.handleIntent(HeadlinesIntent.ReloadHeadlines) },
+        onLoadMoreHeadlines = {},
         state = state,
         modifier = modifier,
     )
@@ -47,13 +65,22 @@ fun HeadlinesRoot(
 
 @Composable
 fun Headlines(
+    onReloadHeadlines: () -> Unit,
+    onLoadMoreHeadlines: () -> Unit,
     state: HeadlinesViewModel.State,
     modifier: Modifier = Modifier,
 ) {
     when (state) {
         HeadlinesViewModel.State.Loading -> Loading(modifier = modifier)
-        HeadlinesViewModel.State.Error -> Error(modifier = modifier)
-        is HeadlinesViewModel.State.Success if (state.headlines.isEmpty()) -> Empty(modifier = modifier)
+        is HeadlinesViewModel.State.Error -> Error(
+            onRetryPressed = onReloadHeadlines,
+            uiState = state,
+            modifier = modifier
+        )
+        is HeadlinesViewModel.State.Success if (state.headlines.isEmpty()) -> Empty(
+            onRetryPressed = onReloadHeadlines,
+            modifier = modifier
+        )
         is HeadlinesViewModel.State.Success -> Success(uiState = state, modifier = modifier)
     }
 }
@@ -70,29 +97,76 @@ private fun Loading(
     }
 }
 
-// TODO buildout
 @Composable
 private fun Error(
+    onRetryPressed: () -> Unit,
+    uiState: HeadlinesViewModel.State.Error,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Column(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "An error happened.")
+        Icon(
+            painter = painterResource(drawable.error_24dp_1f1f1f_fill0_wght400_grad0_opsz24),
+            modifier = Modifier.size(64.dp),
+            contentDescription = null,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(Res.string.errorLoadingHeadlines),
+            style = MaterialTheme.typography.h4,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        uiState.errorMessage?.let { errorMessage ->
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.h3,
+                textAlign = TextAlign.Center,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+        TextButton(
+            onClick = onRetryPressed
+        ) {
+            Text(
+                text = stringResource(Res.string.retry),
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
 }
 
-// TODO
 @Composable
 private fun Empty(
+    onRetryPressed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Box(
+    Column(
         modifier = modifier,
-        contentAlignment = Alignment.Center,
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(text = "There are no headlines right now.")
+        Text(
+            text = stringResource(Res.string.headlinesEmpty),
+            style = MaterialTheme.typography.h4,
+            fontWeight = FontWeight.Bold,
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        TextButton(
+            onClick = onRetryPressed,
+        ) {
+            Text(
+                text = stringResource(Res.string.retry),
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold,
+            )
+        }
     }
 }
 
@@ -168,12 +242,11 @@ fun HeadlineImage(
     contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    // TODO This could be improved
     AsyncImage(
         model = url,
         contentDescription = contentDescription,
-//        placeholder = painterResource("drawable/placeholder.png"),
-//        error = painterResource("drawable/error.png"),
+        placeholder = painterResource(drawable.news_24dp_1f1f1f_fill0_wght400_grad0_opsz24),
+        error = painterResource(drawable.error_24dp_1f1f1f_fill0_wght400_grad0_opsz24),
         contentScale = ContentScale.Crop,
         modifier = modifier,
     )
@@ -204,6 +277,7 @@ private fun PreviewLoading() {
 @Composable
 private fun PreviewEmpty() {
     Empty(
+        onRetryPressed = {},
         modifier = Modifier.fillMaxSize(),
     )
 }
@@ -212,6 +286,8 @@ private fun PreviewEmpty() {
 @Composable
 private fun PreviewError() {
     Error(
+        onRetryPressed = {},
+        uiState = HeadlinesViewModel.State.Error(),
         modifier = Modifier.fillMaxSize(),
     )
 }

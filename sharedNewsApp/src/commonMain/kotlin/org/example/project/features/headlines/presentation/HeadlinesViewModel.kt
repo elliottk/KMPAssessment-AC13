@@ -21,7 +21,7 @@ import org.example.project.features.headlines.presentation.model.toPresentation
 class HeadlinesViewModel(
     private val getAllHeadlines: GetAllHeadlines,
     dispatcher: CoroutineDispatcher = Dispatchers.Main,
-) {
+) : HeadlinesIntentHandler {
     private val viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
 
     private val _uiState = MutableStateFlow<State>(State.Loading)
@@ -44,7 +44,7 @@ class HeadlinesViewModel(
                     )
                 },
                 onFailure = { throwable ->
-                    State.Error
+                    State.Error()
                 },
             )
         }
@@ -54,17 +54,40 @@ class HeadlinesViewModel(
         viewModelScope.cancel()
     }
 
+    override fun handleIntent(intent: HeadlinesIntent) {
+        when (intent) {
+            HeadlinesIntent.ReloadHeadlines -> reloadHeadlines()
+        }
+    }
+
+    private fun reloadHeadlines() {
+        viewModelScope.launch {
+            _uiState.update { State.Loading }
+            loadHeadlines()
+        }
+    }
+
     @Immutable
     sealed interface State {
         data object Loading : State
 
-        data object Error : State
+        data class Error(
+            val errorMessage: String? = null,
+        ) : State
 
         data class Success(
             val headlines: ImmutableList<Headline>,
             val isRefreshing: Boolean,
         ) : State
     }
+}
+
+fun interface HeadlinesIntentHandler {
+    fun handleIntent(intent: HeadlinesIntent)
+}
+
+sealed interface HeadlinesIntent {
+    data object ReloadHeadlines : HeadlinesIntent
 }
 
 @Composable
