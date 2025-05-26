@@ -21,6 +21,7 @@ coil = "3.2.0"
 junit = "4.13.2"
 androidx-test-junit = "1.2.1"
 androidx-espresso-core = "3.6.1"
+buildKonfig = "0.17.1"
 
 [libraries]
 # Kotlin & Serialization
@@ -72,3 +73,4 @@ kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref =
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "serialization" }
 composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
 composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+buildKonfig = { id = "com.codingfeline.buildkonfig", version.ref = "buildKonfig" }

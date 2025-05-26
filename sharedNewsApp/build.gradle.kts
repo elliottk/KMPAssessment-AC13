@@ -1,5 +1,6 @@
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import com.codingfeline.buildkonfig.compiler.FieldSpec.Type.STRING
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -7,6 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.buildKonfig)
 }
 
 kotlin {
@@ -99,6 +101,15 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+}
+
+buildkonfig {
+    packageName = "org.example.project"
+    defaultConfigs {
+        buildConfigField(STRING, "HOSTNAME", "cbcmusic.github.io")
+        buildConfigField(STRING, "BASE_URL", "assessment-tmp/data")
+        buildConfigField(STRING, "HEADLINES_ENDPOINT", "data.json")
     }
 }
 

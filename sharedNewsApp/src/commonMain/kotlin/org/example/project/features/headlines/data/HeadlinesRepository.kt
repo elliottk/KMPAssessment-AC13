@@ -1,7 +1,8 @@
 package org.example.project.features.headlines.data
 
 import org.example.project.features.headlines.data.model.HeadlineDto
+import org.example.project.features.headlines.data.model.HeadlinesResponseNetworkModel
 
 interface HeadlinesRepository {
-    suspend fun getAllHeadlines(): Result<List<HeadlineDto>>
+    suspend fun getAllHeadlines(): Result<HeadlinesResponseNetworkModel>
 }

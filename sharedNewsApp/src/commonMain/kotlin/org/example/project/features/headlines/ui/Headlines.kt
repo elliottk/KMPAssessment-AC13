@@ -51,8 +51,8 @@ fun Headlines(
     modifier: Modifier = Modifier,
 ) {
     when (state) {
-        HeadlinesViewModel.State.Loading -> Loading(modifier)
-        HeadlinesViewModel.State.Error -> Error(modifier)
+        HeadlinesViewModel.State.Loading -> Loading(modifier = modifier)
+        HeadlinesViewModel.State.Error -> Error(modifier = modifier)
         is HeadlinesViewModel.State.Success if (state.headlines.isEmpty()) -> Empty(modifier = modifier)
         is HeadlinesViewModel.State.Success -> Success(uiState = state, modifier = modifier)
     }
