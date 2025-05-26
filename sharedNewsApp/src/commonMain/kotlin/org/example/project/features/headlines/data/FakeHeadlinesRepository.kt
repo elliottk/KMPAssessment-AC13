@@ -24,7 +24,7 @@ class FakeHeadlinesRepository : HeadlinesRepository {
                     isLocal = index % 2 == 0,
                     publishedAtUnix = nowEpoch - (index * 86_400_000), // subtract days
                     version = "1.0",
-                    media = MediaDto("https://placekitten.com/200/200?image=$index")
+                    media = MediaDto("https://i.cbc.ca/1.7384058.1731634500!/cumulusImage/httpImage/image.jpg_gen/derivatives/16x9_620/taylor-swift-eras-day-1.jpg")
                 )
             }
         )

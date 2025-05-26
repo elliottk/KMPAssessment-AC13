@@ -34,12 +34,19 @@ kotlin {
             implementation(compose.foundation)
             implementation(compose.material)
             implementation(compose.ui)
+            implementation(compose.animation)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.datetime)
             implementation(libs.kotlinx.collections.immutable)
             implementation(libs.koin.core)
+            implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.coil.compose)
+            implementation(libs.coil.network.ktor3)
         }
 
         androidMain.dependencies {
@@ -50,10 +57,12 @@ kotlin {
             implementation(libs.androidx.lifecycle.runtime.compose)
             implementation(libs.koin.compose)
             implementation(libs.koin.android)
+            implementation(libs.ktor.client.okhttp)
             // Add Android dependencies here
         }
 
         iosMain.dependencies {
+            implementation(libs.ktor.client.darwin)
             // Add iOS dependencies here
         }
     }

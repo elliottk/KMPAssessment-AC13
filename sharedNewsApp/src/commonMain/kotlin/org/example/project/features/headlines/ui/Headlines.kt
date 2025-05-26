@@ -1,6 +1,5 @@
 package org.example.project.features.headlines.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,9 +21,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import kotlinx.collections.immutable.toPersistentList
 import org.example.project.features.headlines.debug.fakeHeadlineList
 import org.example.project.features.headlines.presentation.HeadlinesViewModel
@@ -168,7 +168,15 @@ fun HeadlineImage(
     contentDescription: String,
     modifier: Modifier = Modifier,
 ) {
-    Box(modifier = modifier.background(color = Color.Red))
+    // TODO This could be improved
+    AsyncImage(
+        model = url,
+        contentDescription = contentDescription,
+//        placeholder = painterResource("drawable/placeholder.png"),
+//        error = painterResource("drawable/error.png"),
+        contentScale = ContentScale.Crop,
+        modifier = modifier,
+    )
 }
 
 @Preview
