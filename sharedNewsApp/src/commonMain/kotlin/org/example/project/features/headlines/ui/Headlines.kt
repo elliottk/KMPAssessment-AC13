@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -20,8 +21,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,6 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import kotlinx.collections.immutable.toPersistentList
+import kotlinx.coroutines.flow.distinctUntilChanged
 import newsapp.sharednewsapp.generated.resources.Res
 import newsapp.sharednewsapp.generated.resources.Res.drawable
 import newsapp.sharednewsapp.generated.resources.errorLoadingHeadlines
@@ -57,7 +61,7 @@ fun HeadlinesRoot(
     val state by viewModel.uiState.collectAsState()
     Headlines(
         onReloadHeadlines = { viewModel.handleIntent(HeadlinesIntent.ReloadHeadlines) },
-        onLoadMoreHeadlines = {},
+        onLoadMoreHeadlines = { viewModel.handleIntent(HeadlinesIntent.LoadMoreHeadlines) },
         state = state,
         modifier = modifier,
     )
@@ -81,7 +85,11 @@ fun Headlines(
             onRetryPressed = onReloadHeadlines,
             modifier = modifier
         )
-        is HeadlinesViewModel.State.Success -> Success(uiState = state, modifier = modifier)
+        is HeadlinesViewModel.State.Success -> Success(
+            onLoadMoreHeadlines = onLoadMoreHeadlines,
+            uiState = state,
+            modifier = modifier
+        )
     }
 }
 
@@ -172,11 +180,28 @@ private fun Empty(
 
 @Composable
 private fun Success(
+    onLoadMoreHeadlines: () -> Unit,
     uiState: HeadlinesViewModel.State.Success,
     modifier: Modifier = Modifier,
 ) {
+    val lazyColumnState = rememberLazyListState()
+    LaunchedEffect(lazyColumnState) {
+        snapshotFlow {
+            val totalItems = lazyColumnState.layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = lazyColumnState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            lastVisibleItemIndex >= totalItems - 1
+        }
+        .distinctUntilChanged()
+        .collect { shouldLoadMore ->
+            if (shouldLoadMore && uiState.hasMore && !uiState.isLoadingMore) {
+                onLoadMoreHeadlines()
+            }
+        }
+    }
+    PullToR
     LazyColumn(
         modifier = modifier,
+        state = lazyColumnState,
     ) {
         items(
            count = uiState.headlines.size,
@@ -186,6 +211,16 @@ private fun Success(
                 headline = uiState.headlines[it],
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
             )
+        }
+        if (uiState.isLoadingMore) {
+            item {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            }
         }
     }
 }
@@ -257,9 +292,11 @@ fun HeadlineImage(
 private fun PreviewSuccess() {
     MaterialTheme {
         Success(
+            onLoadMoreHeadlines = {},
             uiState = HeadlinesViewModel.State.Success(
                 headlines = fakeHeadlineList().map { it.toPresentation() }.toPersistentList(),
-                isRefreshing = false,
+                hasMore = false,
+                isLoadingMore = false,
             )
         )
     }

@@ -7,22 +7,18 @@ import org.example.project.core.network.networkConfiguration
 import org.example.project.features.headlines.data.FakeHeadlinesRepository
 import org.example.project.features.headlines.data.HeadlinesNetworkRepository
 import org.example.project.features.headlines.domain.GetAllHeadlines
+import org.example.project.features.headlines.domain.GetPaginatedHeadlines
 
 @Composable
 actual fun rememberHeadlinesViewModel(): HeadlinesViewModel {
     return remember {
-//        HeadlinesViewModel(
-//            getAllHeadlines = GetAllHeadlines(headlinesRepository = FakeHeadlinesRepository())
-//        )
-
-        // TODO it would be nice to use koin for this...
         HeadlinesViewModel(
-            getAllHeadlines = GetAllHeadlines(
+            getPaginatedHeadlines = GetPaginatedHeadlines(
                 headlinesRepository = HeadlinesNetworkRepository(
                     ktorClient = constructKtorHttpClient(
-                        configuration = networkConfiguration
+                        configuration = networkConfiguration,
                     ),
-                    configuration = networkConfiguration
+                    configuration = networkConfiguration,
                 )
             )
         )
