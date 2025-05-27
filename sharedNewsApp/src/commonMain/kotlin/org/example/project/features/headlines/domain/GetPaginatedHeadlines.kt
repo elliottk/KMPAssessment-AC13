@@ -40,21 +40,23 @@ class GetPaginatedHeadlines(
     private val _pages = MutableStateFlow<Data>(Data())
     val pages = _pages.asStateFlow()
 
-    private val _errors = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
+    private val _errors = MutableSharedFlow<Throwable>(replay = 1)
     val errors = _errors.asSharedFlow()
 
     suspend fun loadNextPage() {
         mutex.withLock {
             try {
-
-                _pages.update {
-                    it.copy(isLoadingMore = true)
-                }
-
+                // being called for the first time, load from network and cache
                 if (cachedHeadlines == null) {
                     headlinesRepository.getAllHeadlines().fold(
                         onSuccess = { networkModels ->
                             cachedHeadlines = networkModels.data.map { it.toDomain() }
+                            if (cachedHeadlines.isNullOrEmpty()) {
+                                _pages.update {
+                                    it.copy(headlines = emptyList())
+                                }
+                                return
+                            }
                         },
                         onFailure = {
                             _errors.emit(it)
@@ -63,7 +65,12 @@ class GetPaginatedHeadlines(
                     )
                 }
 
-                artificialDelay?.let { delay(it) }
+                if (_pages.value.headlines.isNotEmpty()) {
+                    _pages.update {
+                        it.copy(isLoadingMore = true)
+                    }
+                    artificialDelay?.let { delay(it) }
+                }
 
                 val currentData = _pages.value
                 val allHeadlines = cachedHeadlines.orEmpty()
@@ -88,8 +95,8 @@ class GetPaginatedHeadlines(
                 _errors.emit(t)
             }
             finally {
-                _pages.update {
-                    it.copy(isLoadingMore = false)
+                if (_pages.value.isLoadingMore) {
+                    _pages.update { it.copy(isLoadingMore = false) }
                 }
             }
         }

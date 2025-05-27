@@ -11,7 +11,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import newsapp.sharednewsapp.generated.resources.Res
@@ -40,29 +39,26 @@ class HeadlinesViewModel(
     // Observe both page and error emissions from getPaginatedHeadlines
     private fun observePaginatedHeadlines() {
         viewModelScope.launch {
-            launch {
-                getPaginatedHeadlines.errors.collectLatest { throwable ->
-                    _uiState.update {
-                        State.Error(
-                            errorMessageResource = when(throwable) {
-                                is NetworkUnavailableException -> Res.string.errorNetworkUnavailable
-                                else -> null
-                            }
-                        )
-                    }
+            getPaginatedHeadlines.errors.collectLatest { throwable ->
+                _uiState.update {
+                    State.Error(
+                        errorMessageResource = when(throwable) {
+                            is NetworkUnavailableException -> Res.string.errorNetworkUnavailable
+                            else -> null
+                        }
+                    )
                 }
             }
-            launch {
-                getPaginatedHeadlines.pages
-                    .filter { it.headlines.isNotEmpty() }
-                    .collectLatest { data ->
-                    _uiState.update {
-                        State.Success(
-                            headlines = data.headlines.map { it.toPresentation() }.toPersistentList(),
-                            hasMore = !data.isLastPage,
-                            isLoadingMore = data.isLoadingMore,
-                        )
-                    }
+        }
+        viewModelScope.launch {
+            getPaginatedHeadlines.pages
+                .collectLatest { data ->
+                _uiState.update {
+                    State.Success(
+                        headlines = data.headlines.map { it.toPresentation() }.toPersistentList(),
+                        hasMore = !data.isLastPage,
+                        isLoadingMore = data.isLoadingMore,
+                    )
                 }
             }
         }
