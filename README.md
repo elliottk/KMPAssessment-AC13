@@ -1,43 +1,45 @@
-# Assignment - CBC Senior Mobile Developer
-This is a take-home assignment which will help us get a better understanding of how you approach a cross-platform development task. We will 
-look at your architectural decisions, algorithmic design, coding style and overall problem solving skills.
+# 🗞️News Reader - 🚀Andrew Carmichael 🚀
 
-## Project
-A private GitHub repository has been created for you with the shell of a KMP project already set up.  We would like you to create a KMP module that 
-provides the business logic and User Interface for a component that displays news content information that is fetched from the supplied 
-endpoint.  You will need to set up an Android and iOS app that uses this module as well.  The base structure needed to complete all 
-3 pieces is present in the repository.
+A cross-platform news reader application built with Kotlin Multiplatform and Compose Multiplatform targeting Android and iOS.
 
-### Part One: The Compose Multiplatform (CMP) module
-Create a module that provides a component used to display a list of formatted news story items.  This component must be able to be used by both iOS 
-and Android native mobile applications. It is not a standalone app, it is a component that can be integrated in an app. You can be creative in how 
-the component looks and is implemented within the constraints given below.  Each item listed is required for the assessment to be considered complete.
-- UI is created with Compose Multiplatform.  
-- Story data is read from this endpoint: https://cbcmusic.github.io/assessment-tmp/data/data.json.
-- Results are displayed in a list. You can style each list item’s user interface however you want, but each item must include a headline, an image and the date it was published.
-- Allow users to paginate through loaded content.
-- Page size is configurable.
-- If the app goes offline after having loaded data, it can still show the previously loaded results.
-- Include a minimum of 3 unit tests.
+## Build instructions
 
-### Part Two: The apps
-The repository already has the base structure set up for an Android and iOS application.  Complete the implementation of each of these so that it 
-makes use of the module you have created in Part One.
+The application can be built from Android Studio under the following recommended configuration.
 
-### Part Three: The Documentation
-Create a document that you could use to onboard a developer who is new to your project. Highlight the architectural choices you made and why, 
-any other important technical insights and any instructions needed to use your component. It can be a short 500 word readme.md document, an 
-annotated visual diagram or something else entirely, depending on your preferred documentation style.  If you wish to do a readme.md document, you are welcome
-to overwrite this project description.  You have been sent a PDF version of this information as well.
+- OSX 15.5
+- Android Studio Meerkat Feature Drop | 2024.3.2
+- Kotlin Multiplatform Plugin 0.8.5(243)-7
+- XCode 16.2
+- Android emulator 16.0
+- iOS Simulator 18.3
 
-***Important Rules:***
-- *You and you alone should complete your submission.*
-- *Refrain from using any official CBC branding in your application.*
-- *Do not share your work with anyone outside of CBC.*
+To run:
+1. Open the project in Android Studio.
+2. Select either the Android or iOS run configuration.
+3. Build and run on emulator or simulator.
 
-## Submission
-If you have any questions or concerns about the requirements, rules or submission, please reach out to our Talent Acquisition Specialist ***Marium Qadir*** 
-(marium.qadir@cbc.ca) and the hiring Senior Engineering Manager ***Kristen Elliott*** (kristen.elliott@cbc.ca).
+## Features
 
-Once you are finished, please inform Marium and Kristen via email.
+- ✅ Multiplatform UI and business logic
+- ✅ Paginated headline list with headline, image, and published date
+- ✅ Error and loading states
+- ✅ Supports pagination with configurable page size
+- ✅ Unit tested core logic (ViewModel)
+- 🟡 Offline caching: not persisted to disk but survives configuration changes and connection loss 
 
+## Tech Stack
+
+- **UI Tech**: JetBrains Compose Multiplatform (Android & iOS)
+- **Network**: Ktor with kotlinx.serialization
+- **DI**: Dependency injection partially implemented using Koin
+- **Testing**: kotlinx.coroutines + Turbine + assertk
+
+## Architecture
+
+The application is built using Clean Architecture following Google's recommended best practices.
+Data moves through the application's architecture in a unidirectional pattern through each layer
+in the architecture. These layers are easily navigated in the code base by following the package names.
+- `data`: Data layer deals with loading news headlines from the network
+- `domain`: Domain layer depends on the data layer, but adds business logic like paging and sorting
+- `presentation`: Presentation layer depends on Domain Layer, converting the data into displayable format.
+- `ui`: Ui layer consumes presentation layer data and displays it on the screen.
