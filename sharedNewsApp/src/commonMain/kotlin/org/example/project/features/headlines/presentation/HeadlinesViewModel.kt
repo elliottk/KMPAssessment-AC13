@@ -4,7 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toPersistentList
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -15,16 +14,18 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import newsapp.sharednewsapp.generated.resources.Res
+import newsapp.sharednewsapp.generated.resources.errorNetworkUnavailable
+import org.example.project.core.network.NetworkUnavailableException
 import org.example.project.features.headlines.domain.GetPaginatedHeadlines
 import org.example.project.features.headlines.presentation.model.Headline
 import org.example.project.features.headlines.presentation.model.toPresentation
+import org.jetbrains.compose.resources.StringResource
 
 class HeadlinesViewModel(
     private val getPaginatedHeadlines: GetPaginatedHeadlines,
-    dispatcher: CoroutineDispatcher = Dispatchers.Main,
+    private val viewModelScope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main),
 ) : HeadlinesIntentHandler {
-
-    private val viewModelScope = CoroutineScope(SupervisorJob() + dispatcher)
 
     private val _uiState = MutableStateFlow<State>(State.Loading)
     val uiState = _uiState.asStateFlow()
@@ -36,13 +37,18 @@ class HeadlinesViewModel(
         }
     }
 
+    // Observe both page and error emissions from getPaginatedHeadlines
     private fun observePaginatedHeadlines() {
         viewModelScope.launch {
             launch {
                 getPaginatedHeadlines.errors.collectLatest { throwable ->
                     _uiState.update {
-                        // TODO error string
-                        State.Error()
+                        State.Error(
+                            errorMessageResource = when(throwable) {
+                                is NetworkUnavailableException -> Res.string.errorNetworkUnavailable
+                                else -> null
+                            }
+                        )
                     }
                 }
             }
@@ -62,6 +68,7 @@ class HeadlinesViewModel(
         }
     }
 
+    // Android only, manage lifecycle of coroutine scope
     fun clear() {
         viewModelScope.cancel()
     }
@@ -76,7 +83,8 @@ class HeadlinesViewModel(
     private fun reloadHeadlines() {
         viewModelScope.launch {
             _uiState.update { State.Loading }
-            getPaginatedHeadlines.reload()
+            getPaginatedHeadlines.reset()
+            getPaginatedHeadlines.loadNextPage()
         }
     }
 
@@ -92,7 +100,7 @@ class HeadlinesViewModel(
         data object Loading : State
 
         data class Error(
-            val errorMessage: String? = null,
+            val errorMessageResource: StringResource? = null,
         ) : State
 
         data class Success(

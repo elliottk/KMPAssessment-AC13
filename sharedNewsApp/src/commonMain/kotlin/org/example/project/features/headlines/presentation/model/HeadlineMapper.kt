@@ -14,5 +14,4 @@ fun DomainHeadline.toPresentation(): Headline {
     )
 }
 
-// TODO
 private fun LocalDate.format() = "${month.name} $dayOfMonth, $year"

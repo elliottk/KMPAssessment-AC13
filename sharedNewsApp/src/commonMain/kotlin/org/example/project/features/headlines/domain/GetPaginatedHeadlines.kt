@@ -102,13 +102,6 @@ class GetPaginatedHeadlines(
         }
     }
 
-    suspend fun reload() {
-        mutex.withLock {
-            reset()
-            loadNextPage()
-        }
-    }
-
     data class Data(
         val headlines: List<Headline> = emptyList(),
         val isLoadingMore: Boolean = false,

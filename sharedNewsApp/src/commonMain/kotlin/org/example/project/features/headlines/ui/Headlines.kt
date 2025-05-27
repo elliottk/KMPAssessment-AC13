@@ -129,10 +129,10 @@ private fun Error(
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(16.dp))
-        uiState.errorMessage?.let { errorMessage ->
+        uiState.errorMessageResource?.let { errorMessageResource ->
             Text(
-                text = errorMessage,
-                style = MaterialTheme.typography.h3,
+                text = stringResource(errorMessageResource),
+                style = MaterialTheme.typography.h5,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -198,7 +198,6 @@ private fun Success(
             }
         }
     }
-    PullToR
     LazyColumn(
         modifier = modifier,
         state = lazyColumnState,
@@ -234,9 +233,7 @@ private fun Headline(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
+        Column {
             HeadlineImage(
                 url = headline.imageUrl,
                 contentDescription = headline.title,

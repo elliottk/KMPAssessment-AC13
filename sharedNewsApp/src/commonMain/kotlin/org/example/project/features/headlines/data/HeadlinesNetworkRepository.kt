@@ -14,6 +14,17 @@ import org.example.project.core.network.MalformedResponseException
 import org.example.project.core.network.NetworkUnavailableException
 import org.example.project.features.headlines.data.model.HeadlinesResponseNetworkModel
 
+/**
+ * A network-backed implementation of [HeadlinesRepository] that retrieves headline data using a Ktor HTTP client.
+ *
+ * This class handles network requests to a configurable endpoint and safely wraps all responses in [Result].
+ * Specific exceptions are caught and mapped to domain-specific exceptions to allow better error handling in consumers.
+ *
+ * Cancellation exceptions are thrown and not wrapped in the returned Result.
+ *
+ * @property ktorClient The [HttpClient] used for making network requests.
+ * @property configuration The [Configuration] containing endpoint paths and base URL information.
+ */
 class HeadlinesNetworkRepository(
     private val ktorClient: HttpClient,
     private val configuration: Configuration,
@@ -26,15 +37,17 @@ class HeadlinesNetworkRepository(
                     path(configuration.baseUrl, configuration.headlinesEndpoint)
                 }
             }
-            if (!httpResponse.status.isSuccess()) {
-                return Result.failure(
+            val result: Result<HeadlinesResponseNetworkModel> = if (!httpResponse.status.isSuccess()) {
+                Result.failure(
                     HttpException(
                         statusCode = httpResponse.status.value,
                         message = httpResponse.status.toString(),
                     )
                 )
+            } else {
+                Result.success(httpResponse.body())
             }
-            Result.success(httpResponse.body())
+            result
         } catch (e: CancellationException) {
             throw e
         } catch (e: IOException) {
@@ -42,7 +55,8 @@ class HeadlinesNetworkRepository(
         } catch (e: JsonConvertException) {
             Result.failure(MalformedResponseException(e.message.orEmpty(), e))
         } catch (e: Throwable) {
-            Result.failure(e) // fallback for anything unexpected
+            println("Unexpected error while fetching headlines: ${e.message}")
+            Result.failure(e)
         }
     }
 }
