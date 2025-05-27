@@ -50,7 +50,9 @@ class GetPaginatedHeadlines(
                 if (cachedHeadlines == null) {
                     headlinesRepository.getAllHeadlines().fold(
                         onSuccess = { networkModels ->
-                            cachedHeadlines = networkModels.data.map { it.toDomain() }
+                            cachedHeadlines = networkModels.data
+                                .sortedByDescending { it.publishedAtUnix }
+                                .map { it.toDomain() }
                             if (cachedHeadlines.isNullOrEmpty()) {
                                 _pages.update {
                                     it.copy(headlines = emptyList())
